@@ -1,0 +1,9 @@
+black
+flake8
+isort
+mypy
+nbstripout
+pre-commit
+pytest
+pytest-cov
+pytest-depends
