@@ -12,3 +12,7 @@ format:
 	mypy . --ignore-missing-imports
 	black . --line-length=120
 	flake8 . --max-line-length=120 --ignore=E203 --exclude=__init__.py
+
+.PHONY: pytest
+pytest:
+	pytest --cov-report term-missing --cov=draft_optimizer tests/
