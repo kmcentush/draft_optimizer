@@ -13,6 +13,14 @@ def test_league():
     assert league.id == league_id
     assert league.year == year
 
+    # Get teams
+    teams = league.get_teams()
+    assert len(teams) > 0
+
+    # Get picks
+    picks = league.get_picks()
+    assert len(picks) > 0
+
     # Get players
     players = league.get_players(max_players=1)
     assert len(players) > 0
