@@ -1,0 +1,6 @@
+espn_api
+numpy
+pandas
+psutil
+pqdm
+pydantic
