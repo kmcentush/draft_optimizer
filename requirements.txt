@@ -1,6 +1,10 @@
 espn_api
+jupyterlab
+jupyterlab-code-formatter
 numpy
 pandas
 psutil
 pqdm
 pydantic
+pymc
+scikit-learn

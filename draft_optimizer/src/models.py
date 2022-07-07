@@ -15,7 +15,7 @@ class Player(BaseModel):
     id: int
     name: str
     position: str
-    pro_team: str
+    pro_team: Optional[str]
     proj_points: float
 
 
@@ -24,6 +24,9 @@ class ProGame(BaseModel):
     away_id: int
     week: int
     date: datetime.date
+
+    def __hash__(self) -> int:
+        return hash(repr(self))
 
 
 class ProTeam(BaseModel):
@@ -46,7 +49,7 @@ class BaseLeague(BaseModel):
     year: int
     name: Optional[str] = None
 
-    def get_pro_schedule(self) -> Tuple[List[ProTeam], Dict[int, List[ProGame]]]:  # pragma: no cover
+    def get_pro_schedule(self) -> Tuple[Dict[int, ProTeam], Dict[int, List[ProGame]]]:  # pragma: no cover
         raise NotImplementedError
 
     def get_picks(self) -> List[Pick]:  # pragma: no cover

@@ -1,5 +1,5 @@
 import os
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Set, Tuple
 
 import psutil
 from espn_api.football import League as ESPN_League
@@ -26,25 +26,26 @@ class League(BaseLeague):
         # Generate private attributes
         self._espn_league = ESPN_League(league_id=self.id, year=self.year, espn_s2=ESPN_S2, swid=ESPN_SWID)
 
-    def get_pro_schedule(self) -> Tuple[List[ProTeam], Dict[int, List[ProGame]]]:
+    def get_pro_schedule(self) -> Tuple[Dict[int, ProTeam], Dict[int, List[ProGame]]]:
         # Get raw data
         raw = self._espn_league.espn_request.get_pro_schedule()
 
         # Parse
         teams = raw["settings"]["proTeams"]
-        team_objs = []
+        team_objs: Dict[int, ProTeam] = {}
         schedule: Dict[int, List[ProGame]] = {}
+        added: Set[ProGame] = set()
         for team in teams:
             if team["id"] != 0:  # FA
                 # Make team object
                 team_obj = ProTeam(
                     id=team["id"],
                     name=team["name"],
-                    abbrev=team["abbrev"],
+                    abbrev=team["abbrev"].upper(),
                     location=team["location"],
                     bye_week=team["byeWeek"],
                 )
-                team_objs.append(team_obj)
+                team_objs[team_obj.id] = team_obj
 
                 # Build schedule
                 games = team.get("proGamesByScoringPeriod", {})
@@ -59,7 +60,9 @@ class League(BaseLeague):
                         game_obj = ProGame(
                             home_id=game["homeProTeamId"], away_id=game["awayProTeamId"], week=week, date=game["date"]
                         )
-                        schedule[week].append(game_obj)
+                        if game_obj not in added:
+                            schedule[week].append(game_obj)
+                            added |= {game_obj}
 
         return team_objs, schedule
 
@@ -88,7 +91,7 @@ class League(BaseLeague):
                     id=espn_player.playerId,
                     name=espn_player.name,
                     position=espn_player.position,
-                    pro_team=espn_player.proTeam,
+                    pro_team=espn_player.proTeam.upper() if espn_player.proTeam != "None" else None,
                     proj_points=espn_player.projected_total_points,
                 )
             return player
