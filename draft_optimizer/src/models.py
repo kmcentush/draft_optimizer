@@ -1,4 +1,5 @@
-from typing import Dict, List, Optional
+import datetime
+from typing import Dict, List, Optional, Tuple
 
 from pydantic import BaseModel
 
@@ -18,6 +19,21 @@ class Player(BaseModel):
     proj_points: float
 
 
+class ProGame(BaseModel):
+    home_id: int
+    away_id: int
+    week: int
+    date: datetime.date
+
+
+class ProTeam(BaseModel):
+    id: int
+    name: str
+    abbrev: str
+    location: str
+    bye_week: int
+
+
 class Team(BaseModel):
     id: int
     name: str
@@ -29,6 +45,9 @@ class BaseLeague(BaseModel):
     id: int
     year: int
     name: Optional[str] = None
+
+    def get_pro_schedule(self) -> Tuple[List[ProTeam], Dict[int, List[ProGame]]]:  # pragma: no cover
+        raise NotImplementedError
 
     def get_picks(self) -> List[Pick]:  # pragma: no cover
         raise NotImplementedError

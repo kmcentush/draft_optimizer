@@ -13,6 +13,11 @@ def test_league():
     assert league.id == league_id
     assert league.year == year
 
+    # Get pro schedule
+    pro_teams, pro_schedule = league.get_pro_schedule()
+    assert len(pro_teams) == 32
+    assert len(pro_schedule.keys()) == 18
+
     # Get teams
     teams = league.get_teams()
     assert len(teams) > 0

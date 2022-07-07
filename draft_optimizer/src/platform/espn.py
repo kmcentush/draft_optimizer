@@ -1,11 +1,11 @@
 import os
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 
 import psutil
 from espn_api.football import League as ESPN_League
 from pqdm.threads import pqdm
 
-from draft_optimizer.src.models import BaseLeague, Pick, Player, Team
+from draft_optimizer.src.models import BaseLeague, Pick, Player, ProGame, ProTeam, Team
 
 # Get env vars
 ESPN_S2 = os.getenv("ESPN_FANTASY_S2")
@@ -25,6 +25,43 @@ class League(BaseLeague):
 
         # Generate private attributes
         self._espn_league = ESPN_League(league_id=self.id, year=self.year, espn_s2=ESPN_S2, swid=ESPN_SWID)
+
+    def get_pro_schedule(self) -> Tuple[List[ProTeam], Dict[int, List[ProGame]]]:
+        # Get raw data
+        raw = self._espn_league.espn_request.get_pro_schedule()
+
+        # Parse
+        teams = raw["settings"]["proTeams"]
+        team_objs = []
+        schedule: Dict[int, List[ProGame]] = {}
+        for team in teams:
+            if team["id"] != 0:  # FA
+                # Make team object
+                team_obj = ProTeam(
+                    id=team["id"],
+                    name=team["name"],
+                    abbrev=team["abbrev"],
+                    location=team["location"],
+                    bye_week=team["byeWeek"],
+                )
+                team_objs.append(team_obj)
+
+                # Build schedule
+                games = team.get("proGamesByScoringPeriod", {})
+                for week, week_games in games.items():
+                    # Add week if missing
+                    if week not in schedule.keys():
+                        schedule[week] = []
+
+                    # Loop over games each week (won't necessarily be length 1; ex: rescheduled games)
+                    for game in week_games:
+                        # Make game object
+                        game_obj = ProGame(
+                            home_id=game["homeProTeamId"], away_id=game["awayProTeamId"], week=week, date=game["date"]
+                        )
+                        schedule[week].append(game_obj)
+
+        return team_objs, schedule
 
     def get_picks(self) -> List[Pick]:
         # Get picks
