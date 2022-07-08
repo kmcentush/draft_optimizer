@@ -1,9 +1,7 @@
 import os
 from typing import Dict, List, Optional, Set, Tuple
 
-import psutil
 from espn_api.football import League as ESPN_League
-from pqdm.threads import pqdm
 
 from draft_optimizer.src.models import BaseLeague, Pick, Player, ProGame, ProTeam, Team
 
@@ -81,24 +79,26 @@ class League(BaseLeague):
         if max_players is not None:
             player_ids = player_ids[0:max_players]
 
-        # Define helper
-        def _get_player(player_id: int) -> Optional[Player]:
-            # Get player
-            espn_player = self._espn_league.player_info(playerId=player_id)
-            player = None
-            if espn_player is not None:
-                player = Player(
-                    id=espn_player.playerId,
-                    name=espn_player.name,
-                    position=espn_player.position,
-                    pro_team=espn_player.proTeam.upper() if espn_player.proTeam != "None" else None,
-                    proj_points=espn_player.projected_total_points,
-                )
-            return player
-
         # Get players
-        num_threads = psutil.cpu_count() // psutil.cpu_count(logical=False)
-        players = pqdm(player_ids, _get_player, n_jobs=num_threads)
+        chunk_size = 500
+        espn_players = []
+        for i in range(0, len(player_ids), chunk_size):
+            chunk = player_ids[i : i + chunk_size]
+            chunk_players = self._espn_league.player_info(playerId=chunk)
+            if not isinstance(chunk_players, list):
+                chunk_players = [chunk_players]
+            espn_players += chunk_players
+        players = [
+            Player(
+                id=p.playerId,
+                name=p.name,
+                position=p.position,
+                pro_team=p.proTeam.upper() if p.proTeam != "None" else None,
+                proj_points=p.projected_total_points,
+            )
+            for p in espn_players
+            if p is not None
+        ]
         players_dict = {p.id: p for p in players if p is not None}
 
         return players_dict
