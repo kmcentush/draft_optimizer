@@ -16,6 +16,8 @@ class Player(BaseModel):
     name: str
     position: str
     pro_team: Optional[str]
+    points: float
+    weekly_points: Dict[int, float]
     proj_points: float
 
 

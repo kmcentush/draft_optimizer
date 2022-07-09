@@ -94,6 +94,8 @@ class League(BaseLeague):
                 name=p.name,
                 position=p.position,
                 pro_team=p.proTeam.upper() if p.proTeam != "None" else None,
+                points=p.total_points,
+                weekly_points={k: v["points"] for k, v in p.stats.items() if "projected_points" not in v.keys()},
                 proj_points=p.projected_total_points,
             )
             for p in espn_players
