@@ -1,7 +1,11 @@
 espn_api
+ipywidgets
+# jaxlib; see https://github.com/cloudhan/jax-windows-builder
+jax
 jupyterlab
 jupyterlab-code-formatter
 numpy
+numpyro
 pandas
 pydantic
 pymc
