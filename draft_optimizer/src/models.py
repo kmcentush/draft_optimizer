@@ -19,6 +19,7 @@ class Player(BaseModel):
     points: float
     weekly_points: Dict[int, float]
     proj_points: float
+    proj_weekly_points: Dict[int, float]
 
 
 class ProGame(BaseModel):

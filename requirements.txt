@@ -1,12 +1,15 @@
 espn_api
+html5lib
 ipywidgets
 # jaxlib; see https://github.com/cloudhan/jax-windows-builder
 jax
 jupyterlab
 jupyterlab-code-formatter
+lxml
 numpy
 numpyro
 pandas
 pydantic
 pymc
 scikit-learn
+selenium
