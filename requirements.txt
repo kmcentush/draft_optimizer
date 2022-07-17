@@ -1,3 +1,5 @@
+cvxopt
+cvxpy
 espn_api
 html5lib
 ipywidgets
