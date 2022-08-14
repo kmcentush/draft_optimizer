@@ -16,3 +16,7 @@ format:
 .PHONY: pytest
 pytest:
 	pytest --cov-report term-missing --cov=draft_optimizer tests/
+
+.PHONY: run
+run:
+	streamlit run draft_optimizer/app/main.py
