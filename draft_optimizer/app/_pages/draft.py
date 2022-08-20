@@ -1,30 +1,32 @@
 import streamlit as st
 
+from draft_optimizer.app.settings import list_settings, load_settings
+
 
 def display():
     # Display title
     st.markdown("# Draft")
+    st.sidebar.markdown("---")
 
-    # Get state
-    if "num_teams" not in st.session_state:
-        st.error("Settings not applied.")
+    # TODO: go to round/pick (so can revert; will be point-in-time)
+
+    # List settings
+    settings_files = list_settings()
+    settings_file = st.sidebar.selectbox("Settings", settings_files)
+    if settings_file is None:
+        st.error("Settings not selected.")
         st.stop()
-    num_teams = st.session_state["num_teams"]
-    roster_size = st.session_state["roster_size"]
 
-    # Get draft order (snake)
-    teams = list(range(num_teams))
-    draft_order = []
-    for i in range(roster_size):
-        if i % 2 == 0:
-            draft_order += teams
-        else:
-            draft_order += teams[::-1]
+    # Load settings
+    settings = load_settings(settings_file)
+    num_teams = settings["num_teams"]
+    roster_size = settings["roster_size"]
+    draft_order = settings["draft_order"]
+    draft_picks = settings["draft_picks"]
+    teams = [i for i in range(num_teams)]
 
     # Display pick form
-    if "overall_pick" not in st.session_state:
-        st.session_state["overall_pick"] = 0
-    overall_pick = st.session_state["overall_pick"]
+    overall_pick = len(draft_picks)
     if overall_pick >= num_teams * roster_size:
         st.markdown("### Draft Concluded")
     else:
@@ -38,11 +40,9 @@ def display():
             cols[1].markdown("### Best Available")
             submit = st.form_submit_button("Draft")
 
-        # TODO: go to round/pick (so can revert; will be point-in-time)
-
         # Handle picks
         if submit:
-            st.session_state["overall_pick"] += 1
+            # TODO: save pick
             st.experimental_rerun()
 
     # Make team tabs
