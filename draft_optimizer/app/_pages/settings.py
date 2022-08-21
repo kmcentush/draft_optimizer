@@ -14,6 +14,17 @@ def display():
     num_teams = int(cols[1].number_input("Teams", value=12, min_value=6, max_value=12))
     roster_size = int(cols[2].number_input("Roster Size", value=16, min_value=16, max_value=18))
 
+    # Specify position constraints
+    pos_consts = {}
+    with st.expander("Position Limits"):
+        default_max = {"QB": 2, "RB": 6, "WR": 6, "TE": 4, "K": 1, "D/ST": 2}
+        default_min = {"QB": 1, "RB": 2, "WR": 2, "TE": 2, "K": 1, "D/ST": 1}
+        limit_options = list(range(1, 7))
+        cols = st.columns(2)
+        for i, pos in enumerate(default_max.keys()):
+            pos_const = cols[i % 2].select_slider(pos, limit_options, (default_min[pos], default_max[pos]))
+            pos_consts[pos] = (int(pos_const[0]), int(pos_const[1]))
+
     # Specify draft order
     with st.expander("Draft Order"):
         # Get default draft order (snake)
@@ -59,6 +70,7 @@ def display():
             "points_mode": points_mode,
             "num_teams": num_teams,
             "roster_size": roster_size,
+            "pos_consts": pos_consts,
             "draft_order": draft_order,
             "draft_picks": [],
         }
