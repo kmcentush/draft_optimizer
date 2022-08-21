@@ -68,10 +68,14 @@ def display():
 
             # Best available section
             cols[1].markdown("### Best Available")
-            positions = list(pos_consts.keys())
+            positions = ["All"] + list(pos_consts.keys())
             pos_tabs = cols[1].tabs(positions)
             for i, pos_tab in enumerate(pos_tabs):
-                to_display = players.loc[players.index.get_level_values("position") == positions[i]]
+                pos = positions[i]
+                if pos != "All":
+                    to_display = players.loc[players.index.get_level_values("position") == pos]
+                else:
+                    to_display = players
                 to_display = to_display.loc[to_display.index.get_level_values("id").isin(possible_picks.index)]
                 pos_tab.dataframe(to_display["sum_weeks"].nlargest(25).reset_index())
 
