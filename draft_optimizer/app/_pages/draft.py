@@ -123,7 +123,7 @@ def display():
         picks_idx = picks_idx[0 : len(draft_picks)]
         picks_ids = draft_picks[picks_idx]
         roster = players.loc[players.index.get_level_values("id").isin(picks_ids)]
-        cols[0].dataframe(roster["sum_weeks"].reset_index())
+        cols[0].dataframe(roster["sum_weeks"].sort_values(ascending=False).reset_index())
 
         # Optimizer section
         cols[1].markdown("### Optimal Picks")
