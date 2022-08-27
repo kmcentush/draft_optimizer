@@ -24,7 +24,4 @@ def load_players(points_mode: str, year: int = 2022) -> pd.DataFrame:
     players["sum_weeks"] = players.sum(axis=1)
     players["adp"] = players["sum_weeks"].rank(ascending=False)  # TODO: real ADP?
 
-    # Remove players with poor projections
-    players = players.loc[players["sum_weeks"] > 0]
-
     return players

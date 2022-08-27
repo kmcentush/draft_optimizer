@@ -136,6 +136,7 @@ def display():
                 min_pos_const[pos] = consts[0]
                 max_pos_const[pos] = consts[1]
             players_opt = players.reset_index()
+            players_opt = players_opt.loc[players_opt["sum_weeks"] > 0]  # remove players with poor projections
             all_idx = set(players_opt.index)
             set_lookup(
                 WEEK_COLS=week_cols,
@@ -155,7 +156,7 @@ def display():
                 picks_idx[team_pick] |= {player_idx}
                 picked_idx |= {player_idx}
             poss_picks = poss_opt_picks(team, picks_idx, picked_idx)
-            opt_picks = players_opt.loc[poss_picks, ["id", "name", "position", "pro_team", "sum_weeks"]].copy()
+            opt_picks = players_opt.loc[list(poss_picks), ["id", "name", "position", "pro_team", "sum_weeks"]].copy()
             opt_picks = opt_picks.loc[~opt_picks.index.isin(picks_idx[team])]
             opt_picks = opt_picks.sort_values("sum_weeks", ascending=False)
             cols[1].dataframe(opt_picks)
