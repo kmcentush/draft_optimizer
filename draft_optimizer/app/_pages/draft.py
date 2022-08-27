@@ -44,9 +44,23 @@ def display():
     draft_picks = np.array(settings["draft_picks"], dtype=int)
     teams = [i for i in range(num_teams)]
 
+    # Enable go-to draft picks
+    pick_strs = [f"Round: {p // num_teams + 1}, Pick: {p % num_teams + 1}" for p in range(len(draft_picks) + 1)]
+    reversed_pick_strs = pick_strs[::-1]
+    selected_pick = st.sidebar.selectbox("Go-to Pick", reversed_pick_strs, index=0)
+    selected_pick_idx = pick_strs.index(selected_pick)
+    draft_picks = draft_picks[:selected_pick_idx]
+
     # Load players
     players = load_players(points_mode)
     possible_picks = get_possible_picks(draft_picks, players)
+
+    # Display last pick
+    if len(draft_picks) > 0:
+        st.sidebar.write()
+        player_tuple = players.loc[draft_picks[-1]].index[0]
+        player_str = f"{player_tuple[0]} ({player_tuple[1]}, {player_tuple[2]})"
+        st.sidebar.markdown(f"Last pick: {player_str}")
 
     # Display pick form
     overall_pick = len(draft_picks)
@@ -90,7 +104,9 @@ def display():
 
             # Save pick
             player_id = int(possible_picks[possible_picks == pick].index[0])
-            settings["draft_picks"].append(player_id)
+            draft_picks_list = draft_picks.tolist()
+            draft_picks_list.append(player_id)
+            settings["draft_picks"] = draft_picks_list
             save_settings(settings_file, settings)
             st.experimental_rerun()
 
