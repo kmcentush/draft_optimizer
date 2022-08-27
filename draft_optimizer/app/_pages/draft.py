@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 
+from draft_optimizer.app.optimize import poss_opt_picks, set_lookup
 from draft_optimizer.app.players import load_players
 from draft_optimizer.app.settings import list_settings, load_settings, save_settings
 
@@ -125,5 +126,36 @@ def display():
         cols[0].dataframe(roster["sum_weeks"].reset_index())
 
         # Optimizer section
-        cols[1].markdown("### Optimal Team")
-        # TODO
+        cols[1].markdown("### Optimal Picks")
+        optimize = cols[1].button("Optimize", key=f"optimize{team}")
+        if optimize:
+            # Prepare to optimize
+            week_cols = [c for c in players.columns if c.startswith("week")]
+            min_pos_const, max_pos_const = {}, {}
+            for pos, consts in pos_consts.items():
+                min_pos_const[pos] = consts[0]
+                max_pos_const[pos] = consts[1]
+            players_opt = players.reset_index()
+            all_idx = set(players_opt.index)
+            set_lookup(
+                WEEK_COLS=week_cols,
+                ALL_IDX=all_idx,
+                PLAYERS=players_opt,
+                NUM_PLAYERS_CONST=roster_size,
+                MIN_POS_CONST=min_pos_const,
+                MAX_POS_CONST=max_pos_const,
+            )
+
+            # Optimize
+            picks_idx = {k: set() for k in range(num_teams)}
+            picked_idx = set()
+            for i, player_id in enumerate(draft_picks):
+                team_pick = draft_order[i]
+                player_idx = players_opt.loc[players_opt["id"] == player_id].index[0]
+                picks_idx[team_pick] |= {player_idx}
+                picked_idx |= {player_idx}
+            poss_picks = poss_opt_picks(team, picks_idx, picked_idx)
+            opt_picks = players_opt.loc[poss_picks, ["id", "name", "position", "pro_team", "sum_weeks"]].copy()
+            opt_picks = opt_picks.loc[~opt_picks.index.isin(picks_idx[team])]
+            opt_picks = opt_picks.sort_values("sum_weeks", ascending=False)
+            cols[1].dataframe(opt_picks)
