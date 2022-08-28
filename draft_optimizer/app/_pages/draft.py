@@ -42,7 +42,7 @@ def display():
     roster_size = settings["roster_size"]
     pos_consts = settings["pos_consts"]
     draft_order = np.array(settings["draft_order"], dtype=int)
-    draft_picks = np.array(settings["draft_picks"], dtype=int)
+    draft_picks = np.array(settings["draft_picks"], dtype=str)
     teams = [i for i in range(num_teams)]
 
     # Enable go-to draft picks
@@ -59,7 +59,8 @@ def display():
     # Display last pick
     if len(draft_picks) > 0:
         st.sidebar.write()
-        player_tuple = players.loc[draft_picks[-1]].index[0]
+        last_pick_id = str(draft_picks[-1])
+        player_tuple = players.loc[last_pick_id].index[0]
         player_str = f"{player_tuple[0]} ({player_tuple[1]}, {player_tuple[2]})"
         st.sidebar.markdown(f"Last pick: {player_str}")
 
@@ -104,7 +105,7 @@ def display():
                 st.stop()
 
             # Save pick
-            player_id = int(possible_picks[possible_picks == pick].index[0])
+            player_id = str(possible_picks[possible_picks == pick].index[0])
             draft_picks_list = draft_picks.tolist()
             draft_picks_list.append(player_id)
             settings["draft_picks"] = draft_picks_list
