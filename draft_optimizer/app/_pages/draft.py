@@ -3,7 +3,7 @@ import pandas as pd
 import streamlit as st
 
 from draft_optimizer.app.optimize import poss_opt_picks, set_lookup
-from draft_optimizer.app.players import load_players
+from draft_optimizer.app.players import load_players  # , sync_picks
 from draft_optimizer.app.settings import list_settings, load_settings, save_settings
 
 
@@ -37,6 +37,9 @@ def display():
 
     # Load settings
     settings = load_settings(settings_file)
+    year = settings["year"]
+    # league_id = settings["league_id"]
+    # platform = settings["platform"]
     points_mode = settings["points_mode"]
     num_teams = settings["num_teams"]
     roster_size = settings["roster_size"]
@@ -44,29 +47,49 @@ def display():
     draft_order = np.array(settings["draft_order"], dtype=int)
     draft_picks = np.array(settings["draft_picks"], dtype=str)
     teams = [i for i in range(num_teams)]
+    max_overall_pick = num_teams * roster_size
+    overall_pick = len(draft_picks)
 
     # Enable go-to draft picks
     pick_strs = [f"Round: {p // num_teams + 1}, Pick: {p % num_teams + 1}" for p in range(len(draft_picks) + 1)]
+    if overall_pick >= max_overall_pick:
+        pick_strs[-1] = "Draft Conclusion"
     reversed_pick_strs = pick_strs[::-1]
     selected_pick = st.sidebar.selectbox("Go-to Pick", reversed_pick_strs, index=0)
     selected_pick_idx = pick_strs.index(selected_pick)
     draft_picks = draft_picks[:selected_pick_idx]
 
     # Load players
-    players = load_players(points_mode)
+    players = load_players(points_mode, year)
     possible_picks = get_possible_picks(draft_picks, players)
 
     # Display last pick
     if len(draft_picks) > 0:
-        st.sidebar.write()
         last_pick_id = str(draft_picks[-1])
         player_tuple = players.loc[last_pick_id].index[0]
         player_str = f"{player_tuple[0]} ({player_tuple[1]}, {player_tuple[2]})"
         st.sidebar.markdown(f"Last pick: {player_str}")
 
+    # Maybe display sync
+    # if league_id is not None and platform is not None:
+    #     # Display button
+    #     st.sidebar.markdown("---")
+    #     sync = st.sidebar.button("Sync Draft")
+    #
+    #     # Sync
+    #     if sync:
+    #         # Get picks
+    #         synced_pick_ids = sync_picks(league_id, platform, year)
+    #         synced_pick_ids = synced_pick_ids[0:max_overall_pick]
+    #
+    #         # Update and re-run
+    #         settings["draft_picks"] = synced_pick_ids
+    #         save_settings(settings_file, settings)
+    #         st.experimental_rerun()
+
     # Display pick form
     overall_pick = len(draft_picks)
-    if overall_pick >= num_teams * roster_size:
+    if overall_pick >= max_overall_pick:
         st.markdown("### Draft Concluded")
     else:
         # Get info

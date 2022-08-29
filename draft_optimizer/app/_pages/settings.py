@@ -9,6 +9,10 @@ def display():
 
     # Specify settings
     league_name = st.text_input("League Name", "")
+    cols = st.columns(3)
+    year = int(cols[0].number_input("Year", value=2022, min_value=2020, max_value=2030))
+    league_id = cols[1].text_input("League ID (optional)", "")
+    platform = cols[2].radio("Platform (optional)", [None, "ESPN", "Sleeper"], horizontal=True)
     cols = st.columns(4)
     points_mode = cols[0].radio("Points Mode", ["PPR", "Half PPR"], horizontal=True)
     num_teams = int(cols[1].number_input("Teams", value=12, min_value=6, max_value=12))
@@ -67,6 +71,9 @@ def display():
         # Save output
         settings = {
             "league_name": league_name,
+            "year": year,
+            "league_id": None if league_id == "" else league_id,
+            "platform": None if platform == "None" else platform,
             "points_mode": points_mode,
             "num_teams": num_teams,
             "roster_size": roster_size,
