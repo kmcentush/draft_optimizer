@@ -160,7 +160,9 @@ def display():
                 min_pos_const[pos] = consts[0]
                 max_pos_const[pos] = consts[1]
             players_opt = players.reset_index()
-            players_opt = players_opt.loc[players_opt["sum_weeks"] > 0]  # remove players with poor projections
+            to_keep = players_opt["sum_weeks"] > 0  # remove players with poor projections
+            to_keep |= players_opt["id"].isin(draft_picks)  # keep any picks
+            players_opt = players_opt.loc[to_keep]
             all_idx = set(players_opt.index)
             set_lookup(
                 WEEK_COLS=week_cols,
